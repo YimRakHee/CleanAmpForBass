@@ -22,15 +22,13 @@ public:
 
     Biquad hpf, bass_shelf, mid_peak, treble_shelf, lpf;
 
-    // 파라미터 캐싱용 변수
     float last_hpf, last_bass, last_mid_f, last_mid_g, last_treble, last_lpf, last_master;
     float master_gain_linear;
 
     CleanAmpForBass(double rate) : sample_rate(static_cast<float>(rate)) {
-        // 1. 내부 상태 초기화
+
         hpf.reset(); bass_shelf.reset(); mid_peak.reset(); treble_shelf.reset(); lpf.reset();
 
-        // 2. 초기값을 .ttl의 default 값과 일치시켜 첫 run에서의 중복 계산 방지
         last_hpf = 30.0f;
         last_bass = 0.0f;
         last_mid_f = 500.0f;
@@ -40,8 +38,6 @@ public:
         last_master = 0.0f;
         master_gain_linear = 1.0f;
 
-        // 3. 인스턴스 생성 시(비실시간 스레드) 미리 계수 계산
-        // 이 과정 덕분에 첫 run() 호출 시 삼각함수 연산이 실행되지 않아 Xrun이 방지됩니다.
         hpf.setHighPass(last_hpf, sample_rate);
         bass_shelf.setLowShelf(80.0f, sample_rate, last_bass);
         mid_peak.setPeak(last_mid_f, sample_rate, last_mid_g);
@@ -49,9 +45,7 @@ public:
         lpf.setLowPass(last_lpf, sample_rate);
     }
 
-    // 인라인 함수로 성능 최적화
     inline void update_params() {
-        // 값이 실제로 변했을 때만 무거운 연산(pow, sin, cos) 수행
         if (*ports[PORT_MASTER_GAIN] != last_master) {
             last_master = *ports[PORT_MASTER_GAIN];
             master_gain_linear = std::pow(10.0f, last_master / 20.0f);
@@ -90,26 +84,22 @@ public:
     static void run(LV2_Handle instance, uint32_t n_samples) {
         auto* self = static_cast<CleanAmpForBass*>(instance);
 
-        // 파라미터 업데이트 (변경 사항이 있을 때만 동작)
         self->update_params();
 
         const float* in = self->ports[PORT_IN];
         float* out = const_cast<float*>(self->ports[PORT_OUT]);
         const float gain = self->master_gain_linear;
 
-        // 루프 최적화 힌트
         #pragma GCC ivdep
         for (uint32_t i = 0; i < n_samples; ++i) {
             float s = in[i];
 
-            // 필터 체인 (Biquad.hpp의 process 함수는 inline 필수)
             s = self->hpf.process(s);
             s = self->bass_shelf.process(s);
             s = self->mid_peak.process(s);
             s = self->treble_shelf.process(s);
             s = self->lpf.process(s);
 
-            // 최종 출력 및 클리핑 방지
             out[i] = std::clamp(s * gain, -1.0f, 1.0f);
         }
     }

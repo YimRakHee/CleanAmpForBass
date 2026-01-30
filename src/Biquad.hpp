@@ -27,7 +27,7 @@ public:
         normalize();
     }
 
-    // Low Shelf (Bass 제어용)
+    // Low Shelf
     void setLowShelf(float freq, float sr, float gain_db, float q = 0.707f) {
         float A = std::pow(10.0f, gain_db / 40.0f);
         float w0 = 2.0f * M_PI * freq / sr;
@@ -43,7 +43,7 @@ public:
         normalize();
     }
 
-    // Peaking EQ (Mid 제어용)
+    // Peaking EQ
     void setPeak(float freq, float sr, float gain_db, float q = 0.707f) {
         float A = std::pow(10.0f, gain_db / 40.0f);
         float w0 = 2.0f * M_PI * freq / sr;
@@ -59,7 +59,7 @@ public:
         normalize();
     }
 
-    // High Shelf (Treble 제어용)
+    // High Shelf
     void setHighShelf(float freq, float sr, float gain_db, float q = 0.707f) {
         float A = std::pow(10.0f, gain_db / 40.0f);
         float w0 = 2.0f * M_PI * freq / sr;
