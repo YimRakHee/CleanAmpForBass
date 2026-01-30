@@ -1,0 +1,8 @@
+# lv2/manifest.ttl
+@prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<https://github.com/YimRakHee/CleanAmpForBass>
+    a lv2:Plugin ;
+    lv2:binary <CleanAmpForBass.so> ;
+    rdfs:seeAlso <plugin.ttl> .
