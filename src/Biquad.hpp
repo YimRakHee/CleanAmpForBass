@@ -14,7 +14,6 @@ public:
         z1 = z2 = 0.0f;
     }
 
-    // --- 필터 계수 설정 함수들 (기존과 동일) ---
     void setHighPass(float freq, float sr, float q = 0.707f) {
         float w0 = 2.0f * M_PI * freq / sr;
         float alpha = std::sin(w0) / (2.0f * q);
@@ -72,7 +71,6 @@ public:
     }
 
     inline float process(float in) {
-        // Denormal prevention: 0에 무한히 가까운 값을 방지
         static const float antidenormal = 1e-18f;
         float out = b0 * in + z1 + antidenormal;
         z1 = b1 * in - a1 * out + z2;

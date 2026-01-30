@@ -30,7 +30,6 @@ public:
     CleanAmpForBass(double rate) : sample_rate(static_cast<float>(rate)) {
         hpf.reset(); bass_shelf.reset(); mid_peak.reset(); treble_shelf.reset(); lpf.reset();
 
-        // 중요: .ttl의 default 값과 정확히 일치시켜 첫 run에서의 연산을 방지함
         last_hpf = 30.0f; last_bass = 0.0f; last_mid_f = 500.0f;
         last_mid_g = 0.0f; last_treble = 0.0f; last_lpf = 5000.0f;
         last_master_db = 0.0f;
@@ -38,11 +37,9 @@ public:
         current_gain = 1.0f;
         target_gain = 1.0f;
 
-        // 생성자(비실시간 스레드)에서 미리 계산
         prepare_filters();
     }
 
-    // 필터 계수 계산을 별도 함수로 분리
     void prepare_filters() {
         hpf.setHighPass(last_hpf, sample_rate);
         bass_shelf.setLowShelf(80.0f, sample_rate, last_bass);
@@ -94,7 +91,7 @@ public:
         static_cast<CleanAmpForBass*>(instance)->ports[port] = static_cast<const float*>(data);
     }
 
-    // activate: 오디오가 흐르기 직전 최종 준비
+    // activate:
     static void activate(LV2_Handle instance) {
         auto* self = static_cast<CleanAmpForBass*>(instance);
         self->hpf.reset();
@@ -102,7 +99,6 @@ public:
         self->mid_peak.reset();
         self->treble_shelf.reset();
         self->lpf.reset();
-        // 포트 값으로 초기 타겟 게인 설정
         self->last_master_db = *self->ports[PORT_MASTER_GAIN];
         self->current_gain = self->target_gain = std::pow(10.0f, self->last_master_db / 20.0f);
     }
@@ -139,7 +135,7 @@ static const LV2_Descriptor descriptor = {
     "https://github.com/YimRakHee/CleanAmpForBass",
     CleanAmpForBass::instantiate,
     CleanAmpForBass::connect_port,
-    CleanAmpForBass::activate, // activate 추가
+    CleanAmpForBass::activate,
     CleanAmpForBass::run,
     nullptr,
     CleanAmpForBass::cleanup,
