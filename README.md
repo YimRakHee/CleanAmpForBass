@@ -1,5 +1,5 @@
 ## CleanAmpForBass
-Lightweight clean (pre)amp LV2 plugin for bass guitar. Built with pure C++20 and zero external dependencies, it offers an exceptionally low CPU footprint and zero latency.<br>
+Lightweight clean (pre)amp LV2 plugin for bass guitar. Built with pure C++20 and zero external dependencies, it offers low CPU footprint and zero latency.<br>
 No GUI.<br>
 Tested Environment: Arch Linux / Ardour.<br>
 
